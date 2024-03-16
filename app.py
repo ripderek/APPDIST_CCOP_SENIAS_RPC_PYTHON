@@ -18,6 +18,7 @@ import os
 from datetime import datetime
 from Entrenamiento import entrenar_modelo
 from Prediccion import predecir_imagen_base64
+import shutil
 
 #NO CAMBIAR LOS NOMBRES DE LAS FUNCIONES, si cambian aqui entonces tambien en el cliente, esto es un RPC no una API 
 
@@ -78,6 +79,56 @@ def PredecirImagen(imagen_base64,ModeloAPredecir):
 
     print(clase_predicha)
     return (clase_predicha)
+
+#funcion para listar en un JSON todas las carpetas que esten en Senias con sus nombres 
+@dispatcher.add_method
+def listar_carpetas():
+    directorio = './Senias/'
+    carpetas = [{'nombre': nombre} for nombre in os.listdir(directorio) if os.path.isdir(os.path.join(directorio, nombre))]
+    return json.dumps(carpetas)
+
+#funcion para listar las imagenes de un directorio para luego poder eliminarlas skere modo diablo
+@dispatcher.add_method
+def listar_imagenes_en_carpeta(NombreSenia):
+    imagenes = []
+    ruta_carpeta = os.path.join("./Senias/", NombreSenia)
+    for nombre_imagen in os.listdir(ruta_carpeta):
+        if nombre_imagen.endswith(('.png', '.jpg', '.jpeg', '.gif')):
+            with open(os.path.join(ruta_carpeta, nombre_imagen), "rb") as imagen_archivo:
+                base64_image = base64.b64encode(imagen_archivo.read()).decode('utf-8')
+                imagenes.append({"nombreImagen": nombre_imagen, "base64": base64_image})
+    return json.dumps(imagenes)
+
+#Funcion para eliminar una imagen skere modo diablo
+@dispatcher.add_method
+def eliminar_imagen(nombre_imagen, carpeta):
+    ruta_imagen = os.path.join("./Senias/", carpeta, nombre_imagen)
+    if os.path.exists(ruta_imagen):
+        os.remove(ruta_imagen)
+        return f"Imagen {nombre_imagen} eliminada correctamente."
+    else:
+        return f"La imagen {nombre_imagen} no existe en la carpeta {carpeta}."
+
+#Funcion para renombrar una carpeta o una senia para el modelo
+@dispatcher.add_method
+def renombrar_carpeta(nombre_actual, nuevo_nombre):
+    ruta_actual = os.path.join("./Senias/", nombre_actual)
+    ruta_nueva = os.path.join("./Senias/", nuevo_nombre)
+    if os.path.exists(ruta_actual):
+        os.rename(ruta_actual, ruta_nueva)
+        return f"Carpeta {nombre_actual} renombrada a {nuevo_nombre}."
+    else:
+        return f"La carpeta {nombre_actual} no existe."
+  
+#Funcion para eliminar una senia de manera definitiva con todo y su contenido 
+@dispatcher.add_method
+def eliminar_carpeta(nombre_carpeta):
+    ruta_carpeta = os.path.join("./Senias/", nombre_carpeta)
+    if os.path.exists(ruta_carpeta):
+        shutil.rmtree(ruta_carpeta)
+        return f"Carpeta {nombre_carpeta} y su contenido eliminados correctamente."
+    else:
+        return f"La carpeta {nombre_carpeta} no existe."
 
 
 #if __name__ == "__main__":
