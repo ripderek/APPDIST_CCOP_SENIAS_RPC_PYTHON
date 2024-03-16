@@ -18,7 +18,8 @@ import os
 from datetime import datetime
 from Entrenamiento import entrenar_modelo
 from Prediccion import predecir_imagen_base64
-
+# para eliminar carpetas
+import  shutil
 #NO CAMBIAR LOS NOMBRES DE LAS FUNCIONES, si cambian aqui entonces tambien en el cliente, esto es un RPC no una API 
 
 ##############################################SENIAS APP###########################################################
@@ -46,6 +47,20 @@ def GenerarModelo():
     #La carpeta principal puede ser: ./Modelo/ y dentro tendrian que ir los modelos generados con la fecha como nombre
     fecha_actual = datetime.now().strftime("%Y%m%d%H%M%S") #para evitar que se puedan repetir
     entrenar_modelo("Modelo"+fecha_actual)
+    
+@dispatcher.add_method
+def  listar_modelos ():
+    directorio_actual = './Modelos'
+ # Listar carpeta de l los modelos
+    modelos = [os.path.splitext(archivo)[0] for archivo in os.listdir(directorio_actual) 
+                          if os.path.isfile(os.path.join(directorio_actual, archivo))]
+   
+    return {"modelos":modelos}
+
+@dispatcher.add_method
+def  eliminar_modelo (modelo):
+    os.remove (f'./Modelos/{modelo}.keras')
+    return {"modelo":modelo}
 
 #funcion para predecir la imagen skere modo diablo
 @dispatcher.add_method
@@ -101,3 +116,4 @@ def application(request):
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
     run_simple('localhost', 4000, application)
+    
