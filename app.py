@@ -130,6 +130,31 @@ def eliminar_carpeta(nombre_carpeta):
     else:
         return f"La carpeta {nombre_carpeta} no existe."
 
+#funcion para listar los modelos para usarlos en el test o eliminarlos skere 
+@dispatcher.add_method
+def listar_modelos():
+    ruta_carpeta = "./Modelos/"
+    modelos = []
+    for nombre_archivo in os.listdir(ruta_carpeta):
+        if nombre_archivo.endswith('.keras'):
+            modelos.append({"nombre": nombre_archivo})
+    return json.dumps(modelos)
+
+
+#funcion para eliminar un modelo de la carpeta modelo
+@dispatcher.add_method
+def eliminar_modelo( nombreModelo):
+    ruta_imagen = os.path.join("./Modelos/", nombreModelo)
+    if os.path.exists(ruta_imagen):
+        os.remove(ruta_imagen)
+        return f"Modelo eliminado correctamente."
+    else:
+        return f"El modelo no existe {nombreModelo}."
+
+
+
+
+
 
 #if __name__ == "__main__":
  #   app.run(host='0.0.0.0', port=81)

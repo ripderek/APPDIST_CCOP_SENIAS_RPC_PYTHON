@@ -6,7 +6,7 @@ import base64
 
 def predecir_imagen_base64(nombre_archivo_modelo, imagen_base64):
     # Cargar el modelo
-    model_path = f"./Modelos/{nombre_archivo_modelo}.keras"
+    model_path = f"./Modelos/{nombre_archivo_modelo}"
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"No se encontró el archivo {model_path}")
     modelo = tf.keras.models.load_model(model_path)
